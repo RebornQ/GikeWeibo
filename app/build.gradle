@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+
+// 加载 keystore.properties 文件
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -10,10 +16,45 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    buildTypes {
+    signingConfigs {
+        debug {
+            storeFile file(keystoreProperties['RELEASE_STORE_FILE'])
+            storePassword keystoreProperties['RELEASE_KEYSTORE_PASSWORD']
+            keyAlias keystoreProperties['RELEASE_KEY_ALIAS']
+            keyPassword keystoreProperties['RELEASE_KEY_PASSWORD']
+        }
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            storeFile file(keystoreProperties['RELEASE_STORE_FILE'])
+            storePassword keystoreProperties['RELEASE_KEYSTORE_PASSWORD']
+            keyAlias keystoreProperties['RELEASE_KEY_ALIAS']
+            keyPassword keystoreProperties['RELEASE_KEY_PASSWORD']
+        }
+    }
+    buildTypes {
+        debug {
+            // 签名
+            signingConfig signingConfigs.release
+            versionNameSuffix ".debug"
+            applicationIdSuffix ".debug"
+            resValue "string", "scheme", "wbu-debug"
+        }
+        release {
+            // 签名
+            signingConfig signingConfigs.release
+            resValue "string", "scheme", "wbu"
+            // Zipalign优化
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources true
+            // 混淆
+            minifyEnabled true
+            proguardFile 'proguard-android.txt'
+            proguardFile 'proguard-rules.pro'
+        }
+        android.applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "WeiboUnofficial-${variant.baseName}-${variant.versionCode}-${variant.versionName}.apk"
+            }
         }
     }
 }
