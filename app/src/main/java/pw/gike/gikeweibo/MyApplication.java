@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial;
+package pw.gike.gikeweibo;
 
 import android.app.Application;
 import android.content.Context;
@@ -11,7 +11,7 @@ public class MyApplication extends Application {
     private static Context context;
 
     public interface Constants {
-        public static final String APP_KEY = "2287123955"; // 应用的APP_KEY
+        public static final String APP_KEY = "1588505149"; // 应用的APP_KEY
         public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";// 应用的回调页
         public static final String SCOPE = // 应用申请的高级权限
                 "email,direct_messages_read,direct_messages_write,"

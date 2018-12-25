@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial.activity;
+package pw.gike.gikeweibo.activity;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import pw.gike.weibounofficial.R;
+import pw.gike.gikeweibo.R;
 
 public class MainActivity extends AppCompatActivity {
 
