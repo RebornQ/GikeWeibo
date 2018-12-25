@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial.util;
+package pw.gike.gikeweibo.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

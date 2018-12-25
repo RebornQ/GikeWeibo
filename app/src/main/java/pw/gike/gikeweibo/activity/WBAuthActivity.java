@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial.activity;
+package pw.gike.gikeweibo.activity;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -16,8 +16,8 @@ import com.sina.weibo.sdk.auth.WbAuthListener;
 import com.sina.weibo.sdk.auth.WbConnectErrorMessage;
 import com.sina.weibo.sdk.auth.sso.SsoHandler;
 
-import pw.gike.weibounofficial.R;
-import pw.gike.weibounofficial.util.DateUtils;
+import pw.gike.gikeweibo.R;
+import pw.gike.gikeweibo.util.DateUtils;
 
 public class WBAuthActivity extends AppCompatActivity {
 

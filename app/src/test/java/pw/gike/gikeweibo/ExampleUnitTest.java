@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial;
+package pw.gike.gikeweibo;
 
 import org.junit.Test;
 
