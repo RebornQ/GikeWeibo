@@ -1,7 +1,7 @@
 .DS_Store
 /build
 /captures
-
+keystore.properties
 # Built application files
 *.apk
 *.aab
