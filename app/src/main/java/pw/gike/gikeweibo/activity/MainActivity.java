@@ -13,7 +13,9 @@ import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pw.gike.gikeweibo.R;
 import pw.gike.gikeweibo.bean.Status;
@@ -111,8 +113,12 @@ public class MainActivity extends AppCompatActivity {
         // 步骤5:创建 网络请求接口 的实例
         GetRequestInterface request = retrofit.create(GetRequestInterface.class);
 
+        // 请求所需的参数（动态参数）
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", mAccessToken.getToken());
+
         //对 发送请求 进行封装
-        Call<Weibo> call = request.getCall(mAccessToken.getToken());
+        Call<Weibo> call = request.getCall(params);
 
         //步骤6:发送网络请求(异步)
         call.enqueue(new Callback<Weibo>() {
