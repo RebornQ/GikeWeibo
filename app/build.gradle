@@ -72,7 +72,15 @@ dependencies {
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.0.2'        //Retrofit专门为Rxjava封装的适配器
+
+    // Okhttp
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'     //打印网络请求的log日志
+
+    // Rxjava
+    implementation 'io.reactivex:rxandroid:1.2.1'                       //Rxjava专门针对anroid封装的RxAndroid
+    implementation 'io.reactivex:rxjava:1.2.4'
 
     // 解决多包冲突
     implementation 'com.android.support:multidex:1.0.3'
