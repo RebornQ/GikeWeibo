@@ -1,4 +1,4 @@
-package pw.gike.weibounofficial;
+package pw.gike.gikeweibo;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
