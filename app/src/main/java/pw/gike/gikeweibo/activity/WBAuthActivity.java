@@ -41,6 +41,7 @@ public class WBAuthActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wbauth);
         initView();
 
+//        AuthInfo authInfo = new AuthInfo(this, MyApplication.Constants.APP_KEY, MyApplication.Constants.REDIRECT_URL, MyApplication.Constants.SCOPE);
         mSsoHandler = new SsoHandler(WBAuthActivity.this);
 
         // 获取Token
@@ -72,8 +73,12 @@ public class WBAuthActivity extends AppCompatActivity {
                         + "\nRefreshToken: " + mAccessToken.getRefreshToken()
                         + "\nExpiresTime: " + DateUtils.getDateToString(mAccessToken.getExpiresTime(), DateUtils.FORMAT_DATE_TIME_SECOND)
                 ));
-
                 Toast.makeText(WBAuthActivity.this, "授权成功", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent();
+//                intent.putExtra("extra_data_tag","access_success");
+                WBAuthActivity.this.setResult(RESULT_FIRST_USER, intent);
+                WBAuthActivity.this.finish();
             } else {
                 // 当您注册的应用程序签名不正确时，就会收到错误 Code，请确保签名正确
                 String code = oauth2AccessToken.getBundle().getString("code", "");
