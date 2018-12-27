@@ -31,6 +31,10 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private Weibo resultWeibo;
 
+    private int currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
+
+    private int lastPage = 1; // 获取到的微博列表最后页码
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +71,9 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     private void request(Oauth2AccessToken mAccessToken) {
         // 请求所需的参数（动态参数）
         Map<String, String> params = new HashMap<>();
-        params.put("access_token", mAccessToken.getToken());
+        params.put("access_token", mAccessToken.getToken());    // 采用OAuth授权方式为必填参数，OAuth授权后获得。
+        params.put("count", "20"); // 单页返回的记录条数，最大不超过100，默认为20。
+        params.put("page", String.valueOf(currentPage));   // 返回结果的页码，默认为1。
         // 发出请求
         NetUtils.request(MainActivity.this, mAccessToken, API.type_statuses, API.home_timeline, params);
 //                        NetUtils.setDataListener(MainActivity.this);
@@ -81,7 +87,16 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 }
 
                 if (resultWeibo != null) {
-                    tvToken.setText(resultWeibo.getStatuses().get(1).getText());
+                    try {
+                        String tvShowStr = "当前页码：" + currentPage + "\n"
+                                + resultWeibo.getStatuses().get(1).getText();
+                        tvToken.setText(tvShowStr);
+                        lastPage = currentPage;
+                    } catch (IndexOutOfBoundsException e) {
+                        currentPage = -1;  // 页码等于-1时代表出错，不再自增
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(MainActivity.this, "获取信息失败！", Toast.LENGTH_SHORT).show();
                 }
@@ -98,13 +113,14 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 if (mAccessToken != null && mAccessToken.getToken() != null && !mAccessToken.getToken().equals("")) {
                     if (mAccessToken.isSessionValid()) {
                         // 已登录，执行请求操作
-                        if (resultWeibo != null) {
-                            tvToken.setText(resultWeibo.getStatuses().get(1).getText());
-                        } else {
-                            Toast.makeText(MainActivity.this, "获取信息失败！", Toast.LENGTH_SHORT).show();
+                        if (currentPage > 0) {
+                            currentPage++;
+                            request(mAccessToken);
+                        } else if (currentPage == -1) {
+                            Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
                         }
-                        StringUtils.putTextIntoClip(MainActivity.this, mAccessToken.getToken());
-                        Toast.makeText(MainActivity.this, "复制成功！", Toast.LENGTH_SHORT).show();
+//                        StringUtils.putTextIntoClip(MainActivity.this, mAccessToken.getToken());
+//                        Toast.makeText(MainActivity.this, "复制成功！", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(MainActivity.this, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(MainActivity.this, WBAuthActivity.class);
