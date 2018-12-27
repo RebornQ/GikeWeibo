@@ -63,11 +63,16 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                         Map<String, String> params = new HashMap<>();
                         params.put("access_token", mAccessToken.getToken());
                         NetUtils.request(MainActivity.this, mAccessToken, API.type_statuses, API.home_timeline, params);
-                        NetUtils.setDataListener(MainActivity.this);
-
-                        if (resultWeibo != null) {
-                            Log.i("MainActivity", resultWeibo.toString());
-                        }
+//                        NetUtils.setDataListener(MainActivity.this);
+                        NetUtils.setDataListener(new NetUtils.CallbackData() {
+                            @Override
+                            public void backData(Weibo resultWeibo) {
+                                MainActivity.this.resultWeibo = resultWeibo;
+                                if (MainActivity.this.resultWeibo != null) {
+                                    Log.i("MainActivityCallback", resultWeibo.getTotalNumber().toString());
+                                }
+                            }
+                        });
                     } else {
                         Toast.makeText(MainActivity.this, "Token 已失效", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(MainActivity.this, WBAuthActivity.class);
@@ -125,5 +130,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     @Override
     public void backData(Weibo resultWeibo) {
         this.resultWeibo = resultWeibo;
+        if (this.resultWeibo != null) {
+            Log.i("MainActivityCallback", resultWeibo.getTotalNumber().toString());
+        }
     }
 }

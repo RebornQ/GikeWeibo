@@ -18,14 +18,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetUtils {
 
-    private static Weibo resultWeibo;
+//    private static Weibo resultWeibo;
+
+    private static CallbackData callbackData;
 
     public interface CallbackData {
         public void backData(Weibo resultWeibo);
     }
 
     public static void setDataListener(CallbackData callbackData) {
-        callbackData.backData(resultWeibo);
+//        callbackData.backData(resultWeibo);
+        NetUtils.callbackData = callbackData;
     }
 
     public static void request(final Context context, Oauth2AccessToken mAccessToken, String api_type, String api_detail, Map<String, String> params) {
@@ -61,7 +64,8 @@ public class NetUtils {
 
                 if (resultWeibo != null) {
                     Toast.makeText(context, resultWeibo.getStatuses().get(0).getText(), Toast.LENGTH_SHORT).show();
-                    NetUtils.resultWeibo = resultWeibo;
+//                    NetUtils.resultWeibo = resultWeibo;
+                    callbackData.backData(resultWeibo);
                 } else {
                     Toast.makeText(context, "Can't get result", Toast.LENGTH_SHORT).show();
 
