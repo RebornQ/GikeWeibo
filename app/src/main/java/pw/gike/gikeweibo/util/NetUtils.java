@@ -63,9 +63,8 @@ public class NetUtils {
 //                Toast.makeText(MainActivity.this, statusesList.get(0).getText(), Toast.LENGTH_SHORT).show();
 
                 if (resultWeibo != null) {
-                    Toast.makeText(context, resultWeibo.getStatuses().get(0).getText(), Toast.LENGTH_SHORT).show();
 //                    NetUtils.resultWeibo = resultWeibo;
-                    callbackData.backData(resultWeibo);
+                        callbackData.backData(resultWeibo);
                 } else {
                     Toast.makeText(context, "Can't get result", Toast.LENGTH_SHORT).show();
 
