@@ -5,9 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sina.weibo.sdk.auth.AccessTokenKeeper;
@@ -17,7 +14,6 @@ import com.sina.weibo.sdk.auth.WbConnectErrorMessage;
 import com.sina.weibo.sdk.auth.sso.SsoHandler;
 
 import pw.gike.gikeweibo.R;
-import pw.gike.gikeweibo.util.DateUtils;
 
 public class WBAuthActivity extends AppCompatActivity {
 
@@ -31,31 +27,16 @@ public class WBAuthActivity extends AppCompatActivity {
      */
     private Oauth2AccessToken mAccessToken;
 
-    private TextView tvToken;
-
-    private Button btGetToken;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wbauth);
-        initView();
 
 //        AuthInfo authInfo = new AuthInfo(this, MyApplication.Constants.APP_KEY, MyApplication.Constants.REDIRECT_URL, MyApplication.Constants.SCOPE);
         mSsoHandler = new SsoHandler(WBAuthActivity.this);
 
         // 获取Token
-        btGetToken.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSsoHandler.authorize(new SelfWbAuthListener());
-            }
-        });
-    }
-
-    private void initView() {
-        tvToken = findViewById(R.id.tv_show_token);
-        btGetToken = findViewById(R.id.bt_get_token);
+        mSsoHandler.authorize(new SelfWbAuthListener());
     }
 
     class SelfWbAuthListener implements WbAuthListener {
@@ -67,12 +48,6 @@ public class WBAuthActivity extends AppCompatActivity {
                 // 保存 Token
                 AccessTokenKeeper.writeAccessToken(WBAuthActivity.this, mAccessToken);
                 // 获取 Token 后的操作
-                tvToken.setText(String.valueOf("Token: " + mAccessToken.getToken()
-                        + "\nPhone: " + mAccessToken.getPhoneNum()
-                        + "\nUid: " + mAccessToken.getUid()
-                        + "\nRefreshToken: " + mAccessToken.getRefreshToken()
-                        + "\nExpiresTime: " + DateUtils.getDateToString(mAccessToken.getExpiresTime(), DateUtils.FORMAT_DATE_TIME_SECOND)
-                ));
                 Toast.makeText(WBAuthActivity.this, "授权成功", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent();
@@ -93,6 +68,10 @@ public class WBAuthActivity extends AppCompatActivity {
         @Override
         public void cancel() {
             Toast.makeText(WBAuthActivity.this, "取消授权", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent();
+//                intent.putExtra("extra_data_tag","access_success");
+            WBAuthActivity.this.setResult(RESULT_CANCELED, intent);
+            WBAuthActivity.this.finish();
         }
 
         @Override
