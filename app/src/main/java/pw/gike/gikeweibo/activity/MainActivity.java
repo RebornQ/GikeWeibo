@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,27 +15,21 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import pw.gike.gikeweibo.API;
 import pw.gike.gikeweibo.R;
-import pw.gike.gikeweibo.bean.Status;
 import pw.gike.gikeweibo.bean.Weibo;
-import pw.gike.gikeweibo.interfaces.GetRequestInterface;
+import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NetUtils.CallbackData {
 
     private Button btToWBAuth, btCopyToken;
 
     private TextView tvToken;
 
-    private final static String baseURL = "https://api.weibo.com/2/";
+    private Weibo resultWeibo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +58,16 @@ public class MainActivity extends AppCompatActivity {
                     if (mAccessToken.isSessionValid()) {
                         // 已登录，执行请求操作
                         Toast.makeText(MainActivity.this, "Token: " + mAccessToken.getToken(), Toast.LENGTH_SHORT).show();
-                        request(mAccessToken);
+
+                        // 请求所需的参数（动态参数）
+                        Map<String, String> params = new HashMap<>();
+                        params.put("access_token", mAccessToken.getToken());
+                        NetUtils.request(MainActivity.this, mAccessToken, API.type_statuses, API.home_timeline, params);
+                        NetUtils.setDataListener(MainActivity.this);
+
+                        if (resultWeibo != null) {
+                            Log.i("MainActivity", resultWeibo.toString());
+                        }
                     } else {
                         Toast.makeText(MainActivity.this, "Token 已失效", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(MainActivity.this, WBAuthActivity.class);
@@ -94,59 +98,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    public void request(Oauth2AccessToken mAccessToken) {
-
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(Weibo.class, new StatusModelAdapter())
-//                .create();
-
-        //步骤4:创建Retrofit对象
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseURL) // 设置 网络请求 Url
-                .addConverterFactory(GsonConverterFactory.create())   //设置使用Gson解析(记得加入依赖)
-                //然后将上面的GsonConverterFactory.create()替换成我们自定义的ResponseConverterFactory.create()
-//                .addConverterFactory(ResponseConverterFactory.create())
-//                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-
-        // 步骤5:创建 网络请求接口 的实例
-        GetRequestInterface request = retrofit.create(GetRequestInterface.class);
-
-        // 请求所需的参数（动态参数）
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", mAccessToken.getToken());
-
-        //对 发送请求 进行封装
-        Call<Weibo> call = request.getCall(params);
-
-        //步骤6:发送网络请求(异步)
-        call.enqueue(new Callback<Weibo>() {
-            //请求成功时回调
-            @Override
-            public void onResponse(Call<Weibo> call, Response<Weibo> response) {
-                // 步骤7：处理返回的数据结果
-                List<Status> statusesList = response.body().getStatuses();
-//                Toast.makeText(MainActivity.this, statusesList.get(0).getText(), Toast.LENGTH_SHORT).show();
-
-                if (statusesList != null && !statusesList.isEmpty()) {
-                    Toast.makeText(MainActivity.this, statusesList.get(0).getText(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Can't get result", Toast.LENGTH_SHORT).show();
-
-                }
-            }
-
-            //请求失败时回调
-            @Override
-            public void onFailure(Call<Weibo> call, Throwable throwable) {
-//                System.out.println("连接失败");
-                throwable.printStackTrace();
-                Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -169,5 +120,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Unknown Error", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public void backData(Weibo resultWeibo) {
+        this.resultWeibo = resultWeibo;
     }
 }
