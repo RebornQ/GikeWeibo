@@ -55,7 +55,7 @@ public class WeiboRequests {
     }
 
     /**
-     * 发送一条微博
+     * 评论一条微博
      * @param context 上下文
      * @param mAccessToken OAuth授权后获得的 accessToken
      * @param comment 要评论的微博文本内容
@@ -77,5 +77,27 @@ public class WeiboRequests {
                 API.type_comments, API.comment_create, params);
     }
 
+    /**
+     * 转发一条微博
+     * @param context 上下文
+     * @param mAccessToken OAuth授权后获得的 accessToken
+     * @param id 要转发的微博ID
+     * @param status 添加的转发文本，必须做URLEncode，内容不超过140个汉字，不填则默认为“转发微博”。
+     * */
+    // 暂不可用，应用权限不足（Insufficient app permissions!），需要通过开发者认证
+    private void reportWeiboRequest(Context context, Oauth2AccessToken mAccessToken, long id, String status) {
+        if (status.length() > 140) {    // 内容不超过140个汉字
+            Toast.makeText(context, "字数不能超过140个汉字！", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // 请求所需的参数（动态参数）
+        Map<String, Object> params = new HashMap<>();
+        params.put("access_token", mAccessToken.getToken());    // 采用OAuth授权方式为必填参数，OAuth授权后获得。
+        params.put("id", id);// 需要评论的微博ID。
+        params.put("status", status);// 添加的转发文本，必须做URLEncode，内容不超过140个汉字，不填则默认为“转发微博”。
+        // 发出请求
+        NetUtils.request(context, mAccessToken, NetUtils.REQUEST_POST,
+                API.type_comments, API.comment_create, params);
+    }
 
 }
