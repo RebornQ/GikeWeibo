@@ -1,17 +1,28 @@
 
-package pw.gike.gikeweibo.bean;
+package pw.gike.gikeweibo.bean.statuses;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class CommentManageInfo {
 
+    @SerializedName("comment_manage_button")
+    @Expose
+    private Long commentManageButton;
     @SerializedName("comment_permission_type")
     @Expose
     private Long commentPermissionType;
     @SerializedName("approval_comment_type")
     @Expose
     private Long approvalCommentType;
+
+    public Long getCommentManageButton() {
+        return commentManageButton;
+    }
+
+    public void setCommentManageButton(Long commentManageButton) {
+        this.commentManageButton = commentManageButton;
+    }
 
     public Long getCommentPermissionType() {
         return commentPermissionType;
