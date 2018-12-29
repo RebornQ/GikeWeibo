@@ -13,7 +13,12 @@ import pw.gike.gikeweibo.util.NetUtils;
 
 public class WeiboRequests {
 
-
+    /**
+     * 获取最新的微博列表
+     * @param context 上下文
+     * @param mAccessToken OAuth授权后获得的 accessToken
+     * @param currentPage 获取到的微博列表当前页码
+     * */
     public static void getWeiboRequest(Context context, Oauth2AccessToken mAccessToken, Integer currentPage) {
         // 请求所需的参数（动态参数）
         Map<String, Object> params = new HashMap<>();
@@ -27,7 +32,12 @@ public class WeiboRequests {
 //                        NetUtils.setDataListener(MainActivity.this);
     }
 
-
+    /**
+     * 发送一条微博
+     * @param context 上下文
+     * @param mAccessToken OAuth授权后获得的 accessToken
+     * @param status 要发布的微博文本内容
+     * */
     // 暂不可用，应用权限不足（Insufficient app permissions!），需要通过开发者认证
     private void sendWeiboRequest(Context context, Oauth2AccessToken mAccessToken, String status) {
         if (status.length() > 140) {    // status是要发布的微博文本内容，必须做URLencode，内容不超过140个汉字
@@ -44,6 +54,13 @@ public class WeiboRequests {
                 API.type_statuses, API.updata, params);
     }
 
+    /**
+     * 发送一条微博
+     * @param context 上下文
+     * @param mAccessToken OAuth授权后获得的 accessToken
+     * @param comment 要评论的微博文本内容
+     * @param id 需要评论的微博ID
+     * */
     private void commentWeiboRequest(Context context, Oauth2AccessToken mAccessToken,String comment, long id) {
         if (comment.length() > 140) {    // comment是要评论的微博文本内容，必须做URLencode，内容不超过140个汉字
             Toast.makeText(context, "字数不能超过140个汉字！", Toast.LENGTH_SHORT).show();
