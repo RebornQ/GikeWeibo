@@ -39,7 +39,7 @@ public class WeiboRequests {
      * @param status 要发布的微博文本内容
      * */
     // 暂不可用，应用权限不足（Insufficient app permissions!），需要通过开发者认证
-    private void sendWeiboRequest(Context context, Oauth2AccessToken mAccessToken, String status) {
+    public static void sendWeiboRequest(Context context, Oauth2AccessToken mAccessToken, String status) {
         if (status.length() > 140) {    // status是要发布的微博文本内容，必须做URLencode，内容不超过140个汉字
             Toast.makeText(context, "字数不能超过140个汉字！", Toast.LENGTH_SHORT).show();
             return;
@@ -61,7 +61,7 @@ public class WeiboRequests {
      * @param comment 要评论的微博文本内容
      * @param id 需要评论的微博ID
      * */
-    private void commentWeiboRequest(Context context, Oauth2AccessToken mAccessToken,String comment, long id) {
+    public static void commentWeiboRequest(Context context, Oauth2AccessToken mAccessToken,String comment, long id) {
         if (comment.length() > 140) {    // comment是要评论的微博文本内容，必须做URLencode，内容不超过140个汉字
             Toast.makeText(context, "字数不能超过140个汉字！", Toast.LENGTH_SHORT).show();
             return;
@@ -85,7 +85,7 @@ public class WeiboRequests {
      * @param status 添加的转发文本，必须做URLEncode，内容不超过140个汉字，不填则默认为“转发微博”。
      * */
     // 暂不可用，应用权限不足（Insufficient app permissions!），需要通过开发者认证
-    private void reportWeiboRequest(Context context, Oauth2AccessToken mAccessToken, long id, String status) {
+    public static void reportWeiboRequest(Context context, Oauth2AccessToken mAccessToken, long id, String status) {
         if (status.length() > 140) {    // 内容不超过140个汉字
             Toast.makeText(context, "字数不能超过140个汉字！", Toast.LENGTH_SHORT).show();
             return;

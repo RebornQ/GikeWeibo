@@ -2,6 +2,7 @@
 package pw.gike.gikeweibo.bean.statuses;
 
 import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -16,6 +17,9 @@ public class Weibo {
     @SerializedName("ad")
     @Expose
     private List<Object> ad = null;
+    @SerializedName("marks")
+    @Expose
+    private List<Object> marks = null;
     @SerializedName("hasvisible")
     @Expose
     private Boolean hasvisible;
@@ -66,6 +70,14 @@ public class Weibo {
 
     public void setAd(List<Object> ad) {
         this.ad = ad;
+    }
+
+    public List<Object> getMarks() {
+        return marks;
+    }
+
+    public void setMarks(List<Object> marks) {
+        this.marks = marks;
     }
 
     public Boolean getHasvisible() {
