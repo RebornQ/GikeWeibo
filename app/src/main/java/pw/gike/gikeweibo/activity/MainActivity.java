@@ -13,15 +13,12 @@ import com.google.gson.Gson;
 import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 import pw.gike.gikeweibo.API;
 import pw.gike.gikeweibo.R;
 import pw.gike.gikeweibo.bean.statuses.Weibo;
 import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
+import pw.gike.gikeweibo.util.requests.WeiboRequests;
 
 public class MainActivity extends AppCompatActivity implements NetUtils.CallbackDataListener {
 
@@ -33,9 +30,9 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
 //    private String resultJson;
 
-    private int currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
+    private Integer currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
-    private int lastPage = 1; // 获取到的微博列表最后页码
+    private Integer lastPage = 1; // 获取到的微博列表最后页码
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             if (mAccessToken.isSessionValid()) {
                 // 已登录，执行请求操作
                 Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
-                getWeiboRequest(mAccessToken);
+                WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
             } else {
                 Toast.makeText(MainActivity.this, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, WBAuthActivity.class);
@@ -70,19 +67,6 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         tvToken = findViewById(R.id.tv_show_token);
     }
 
-    private void getWeiboRequest(Oauth2AccessToken mAccessToken) {
-        // 请求所需的参数（动态参数）
-        Map<String, Object> params = new HashMap<>();
-        params.put("access_token", mAccessToken.getToken());    // 采用OAuth授权方式为必填参数，OAuth授权后获得。
-        params.put("count", "20"); // 单页返回的记录条数，最大不超过100，默认为20。
-        params.put("page", String.valueOf(currentPage));   // 返回结果的页码，默认为1。
-        // 发出请求
-//        Call<Weibo> call = null;
-        NetUtils.request(MainActivity.this, mAccessToken, NetUtils.REQUEST_GET,
-                API.type_statuses, API.home_timeline, params);
-//                        NetUtils.setDataListener(MainActivity.this);
-    }
-
     private void setListener() {
 
         // 设置请求的数据返回监听器
@@ -97,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                         // 已登录，执行请求操作
                         if (currentPage > 0) {
                             currentPage++;
-                            getWeiboRequest(mAccessToken);
+                            WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
                         } else if (currentPage == -1) {
                             Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
                         }
@@ -144,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 if (mAccessToken != null && mAccessToken.getToken() != null && !mAccessToken.getToken().equals("")) {
                     if (mAccessToken.isSessionValid()) {
                         Toast.makeText(MainActivity.this, "Token: " + mAccessToken.getToken(), Toast.LENGTH_SHORT).show();
-                        getWeiboRequest(mAccessToken);
+                        WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
                     } else {
                         Toast.makeText(MainActivity.this, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
                     }
@@ -171,6 +155,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             case API.type_statuses + API.home_timeline:
                 // 获取请求结果成功后的操作
                 setWeibo(result);
+                break;
+            case API.type_comments + API.comment_create:
                 break;
         }
     }
