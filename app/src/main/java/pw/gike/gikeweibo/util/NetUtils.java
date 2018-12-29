@@ -8,7 +8,6 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import java.util.Map;
 
 import pw.gike.gikeweibo.API;
-import pw.gike.gikeweibo.bean.Weibo;
 import pw.gike.gikeweibo.interfaces.RequestInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,10 +19,14 @@ public class NetUtils {
 
 //    private static Weibo resultWeibo;
 
+    public final static int REQUEST_GET = 0;
+
+    public final static int REQUEST_POST = 1;
+
     private static CallbackData callbackData;
 
-    public interface CallbackData {
-        public void backData(Weibo resultWeibo);
+    public interface CallbackData<T> {
+        public void backData(T result);
     }
 
     public static void setDataListener(CallbackData callbackData) {
@@ -31,7 +34,7 @@ public class NetUtils {
         NetUtils.callbackData = callbackData;
     }
 
-    public static void request(final Context context, Oauth2AccessToken mAccessToken, String api_type, String api_detail, Map<String, String> params) {
+    public static void request(final Context context, Oauth2AccessToken mAccessToken, int requestType, String api_type, String api_detail, Map<String, Object> params) {
 
 //        Gson gson = new GsonBuilder()
 //                .registerTypeAdapter(Weibo.class, new StatusModelAdapter())
@@ -50,21 +53,27 @@ public class NetUtils {
         RequestInterface request = retrofit.create(RequestInterface.class);
 
         //对 发送请求 进行封装(参考API.java)
-        Call<Weibo> call = request.getCall(api_type, api_detail, params);
+//        Call<Weibo> call = null;
+        Call<Object> call = null;
+        if (requestType == NetUtils.REQUEST_GET) {
+            call = request.getCall(api_type, api_detail, params);
+        } else if (requestType == NetUtils.REQUEST_POST) {
+            call = request.postCall(api_type, api_detail, params);
+        }
 
         //步骤6:发送网络请求(异步)
-        call.enqueue(new Callback<Weibo>() {
+        call.enqueue(new Callback<Object>() {
             //请求成功时回调
             @Override
-            public void onResponse(Call<Weibo> call, Response<Weibo> response) {
+            public void onResponse(Call<Object> call, Response<Object> response) {
 
                 // 步骤7：处理返回的数据结果
-                Weibo resultWeibo = response.body();
+                Object result = response.body();
 //                Toast.makeText(MainActivity.this, statusesList.get(0).getText(), Toast.LENGTH_SHORT).show();
 
-                if (resultWeibo != null) {
-//                    NetUtils.resultWeibo = resultWeibo;
-                        callbackData.backData(resultWeibo);
+                if (result != null) {
+//                    NetUtils.result = result;
+                        callbackData.backData(result);
                 } else {
                     Toast.makeText(context, "Can't get result", Toast.LENGTH_SHORT).show();
 
@@ -73,7 +82,7 @@ public class NetUtils {
 
             //请求失败时回调
             @Override
-            public void onFailure(Call<Weibo> call, Throwable throwable) {
+            public void onFailure(Call<Object> call, Throwable throwable) {
 //                System.out.println("连接失败");
                 throwable.printStackTrace();
                 Toast.makeText(context, "连接失败", Toast.LENGTH_SHORT).show();

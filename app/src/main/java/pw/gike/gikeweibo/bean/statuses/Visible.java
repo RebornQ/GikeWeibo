@@ -1,10 +1,10 @@
 
-package pw.gike.gikeweibo.bean;
+package pw.gike.gikeweibo.bean.statuses;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Visible_ {
+public class Visible {
 
     @SerializedName("type")
     @Expose

@@ -1,5 +1,5 @@
 
-package pw.gike.gikeweibo.bean;
+package pw.gike.gikeweibo.bean.statuses;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

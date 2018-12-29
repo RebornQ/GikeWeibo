@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 
 import pw.gike.gikeweibo.API;
 import pw.gike.gikeweibo.R;
-import pw.gike.gikeweibo.bean.Weibo;
+import pw.gike.gikeweibo.bean.statuses.Weibo;
 import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
 
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     private TextView tvToken;
 
     private Weibo resultWeibo;
+
+    private String resultJson;
 
     private int currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             if (mAccessToken.isSessionValid()) {
                 // 已登录，执行请求操作
                 Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
-                request(mAccessToken);
+                getWeiboRequest(mAccessToken);
             } else {
                 Toast.makeText(MainActivity.this, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MainActivity.this, WBAuthActivity.class);
@@ -68,28 +71,31 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         tvToken = findViewById(R.id.tv_show_token);
     }
 
-    private void request(Oauth2AccessToken mAccessToken) {
+    private void getWeiboRequest(Oauth2AccessToken mAccessToken) {
         // 请求所需的参数（动态参数）
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("access_token", mAccessToken.getToken());    // 采用OAuth授权方式为必填参数，OAuth授权后获得。
         params.put("count", "20"); // 单页返回的记录条数，最大不超过100，默认为20。
         params.put("page", String.valueOf(currentPage));   // 返回结果的页码，默认为1。
         // 发出请求
-        NetUtils.request(MainActivity.this, mAccessToken, API.type_statuses, API.home_timeline, params);
+//        Call<Weibo> call = null;
+        NetUtils.request(MainActivity.this, mAccessToken, NetUtils.REQUEST_GET,
+                API.type_statuses, API.home_timeline, params);
 //                        NetUtils.setDataListener(MainActivity.this);
         // 设置数据返回监听器
         NetUtils.setDataListener(new NetUtils.CallbackData() {
             @Override
-            public void backData(Weibo resultWeibo) {
-                MainActivity.this.resultWeibo = resultWeibo;
-                if (MainActivity.this.resultWeibo != null) {
-                    Log.i("MainActivityCallback", resultWeibo.getTotalNumber().toString());
-                }
+            public void backData(Object result) {
 
-                if (resultWeibo != null) {
+                if (result != null) {
+                    // 获取请求结果成功后的操作
+                    // 通过 Gson 把 Json 反序列化为 Weibo 对象
+                    MainActivity.this.resultWeibo = new Gson().fromJson(StringUtils.objectToJsonString(result), Weibo.class);
+                    Log.i("MainActivityCallback", MainActivity.this.resultWeibo.getTotalNumber().toString());
+
                     try {
                         String tvShowStr = "当前页码：" + currentPage + "\n"
-                                + resultWeibo.getStatuses().get(1).getText();
+                                + MainActivity.this.resultWeibo.getStatuses().get(0).getText();
                         tvToken.setText(tvShowStr);
                         lastPage = currentPage;
                     } catch (IndexOutOfBoundsException e) {
@@ -115,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                         // 已登录，执行请求操作
                         if (currentPage > 0) {
                             currentPage++;
-                            request(mAccessToken);
+                            getWeiboRequest(mAccessToken);
                         } else if (currentPage == -1) {
                             Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
                         }
@@ -146,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 if (mAccessToken != null && mAccessToken.getToken() != null && !mAccessToken.getToken().equals("")) {
                     if (mAccessToken.isSessionValid()) {
                         Toast.makeText(MainActivity.this, "Token: " + mAccessToken.getToken(), Toast.LENGTH_SHORT).show();
-                        request(mAccessToken);
+                        getWeiboRequest(mAccessToken);
                     } else {
                         Toast.makeText(MainActivity.this, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
                     }
@@ -162,10 +168,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     }
 
     @Override
-    public void backData(Weibo resultWeibo) {
-        this.resultWeibo = resultWeibo;
-        if (this.resultWeibo != null) {
-            Log.i("MainActivityCallback", resultWeibo.getTotalNumber().toString());
-        }
+    public void backData(Object result) {
+        this.resultJson = StringUtils.objectToJsonString(result);
     }
 }

@@ -1,14 +1,14 @@
 
-package pw.gike.gikeweibo.bean;
+package pw.gike.gikeweibo.bean.statuses;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class User {
+public class User_ {
 
     @SerializedName("id")
     @Expose
-    private Long id;    // Integer 会报错
+    private Long id; // Integer 会报错
     @SerializedName("idstr")
     @Expose
     private String idstr;
@@ -39,6 +39,9 @@ public class User {
     @SerializedName("profile_image_url")
     @Expose
     private String profileImageUrl;
+    @SerializedName("cover_image")
+    @Expose
+    private String coverImage;
     @SerializedName("cover_image_phone")
     @Expose
     private String coverImagePhone;
@@ -95,7 +98,7 @@ public class User {
     private String remark;
     @SerializedName("insecurity")
     @Expose
-    private Insecurity insecurity;
+    private Insecurity_ insecurity;
     @SerializedName("ptype")
     @Expose
     private Long ptype;
@@ -132,12 +135,6 @@ public class User {
     @SerializedName("verified_type_ext")
     @Expose
     private Long verifiedTypeExt;
-    @SerializedName("pay_remind")
-    @Expose
-    private Long payRemind;
-    @SerializedName("pay_date")
-    @Expose
-    private String payDate;
     @SerializedName("has_service_tel")
     @Expose
     private Boolean hasServiceTel;
@@ -192,6 +189,12 @@ public class User {
     @SerializedName("user_ability")
     @Expose
     private Long userAbility;
+    @SerializedName("cardid")
+    @Expose
+    private String cardid;
+    @SerializedName("avatargj_id")
+    @Expose
+    private String avatargjId;
     @SerializedName("urank")
     @Expose
     private Long urank;
@@ -201,18 +204,6 @@ public class User {
     @SerializedName("vclub_member")
     @Expose
     private Long vclubMember;
-    @SerializedName("cover_image")
-    @Expose
-    private String coverImage;
-    @SerializedName("dianping")
-    @Expose
-    private String dianping;
-    @SerializedName("cardid")
-    @Expose
-    private String cardid;
-    @SerializedName("avatargj_id")
-    @Expose
-    private String avatargjId;
 
     public Long getId() {
         return id;
@@ -300,6 +291,14 @@ public class User {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
     }
 
     public String getCoverImagePhone() {
@@ -446,11 +445,11 @@ public class User {
         this.remark = remark;
     }
 
-    public Insecurity getInsecurity() {
+    public Insecurity_ getInsecurity() {
         return insecurity;
     }
 
-    public void setInsecurity(Insecurity insecurity) {
+    public void setInsecurity(Insecurity_ insecurity) {
         this.insecurity = insecurity;
     }
 
@@ -548,22 +547,6 @@ public class User {
 
     public void setVerifiedTypeExt(Long verifiedTypeExt) {
         this.verifiedTypeExt = verifiedTypeExt;
-    }
-
-    public Long getPayRemind() {
-        return payRemind;
-    }
-
-    public void setPayRemind(Long payRemind) {
-        this.payRemind = payRemind;
-    }
-
-    public String getPayDate() {
-        return payDate;
-    }
-
-    public void setPayDate(String payDate) {
-        this.payDate = payDate;
     }
 
     public Boolean getHasServiceTel() {
@@ -710,6 +693,22 @@ public class User {
         this.userAbility = userAbility;
     }
 
+    public String getCardid() {
+        return cardid;
+    }
+
+    public void setCardid(String cardid) {
+        this.cardid = cardid;
+    }
+
+    public String getAvatargjId() {
+        return avatargjId;
+    }
+
+    public void setAvatargjId(String avatargjId) {
+        this.avatargjId = avatargjId;
+    }
+
     public Long getUrank() {
         return urank;
     }
@@ -732,38 +731,6 @@ public class User {
 
     public void setVclubMember(Long vclubMember) {
         this.vclubMember = vclubMember;
-    }
-
-    public String getCoverImage() {
-        return coverImage;
-    }
-
-    public void setCoverImage(String coverImage) {
-        this.coverImage = coverImage;
-    }
-
-    public String getDianping() {
-        return dianping;
-    }
-
-    public void setDianping(String dianping) {
-        this.dianping = dianping;
-    }
-
-    public String getCardid() {
-        return cardid;
-    }
-
-    public void setCardid(String cardid) {
-        this.cardid = cardid;
-    }
-
-    public String getAvatargjId() {
-        return avatargjId;
-    }
-
-    public void setAvatargjId(String avatargjId) {
-        this.avatargjId = avatargjId;
     }
 
 }
