@@ -23,29 +23,23 @@ public class NetUtils {
 
     public final static int REQUEST_POST = 1;
 
-    private static CallbackData callbackData;
+    private static CallbackDataListener callbackDataListener;
 
-    public interface CallbackData<T> {
-        public void backData(T result);
+    public interface CallbackDataListener<T> {
+        public void callBack(T result, String api);
     }
 
-    public static void setDataListener(CallbackData callbackData) {
-//        callbackData.backData(resultWeibo);
-        NetUtils.callbackData = callbackData;
+    public static void setDataListener(CallbackDataListener callbackDataListener) {
+//        callbackDataListener.callBack(resultWeibo);
+        NetUtils.callbackDataListener = callbackDataListener;
     }
 
-    public static void request(final Context context, Oauth2AccessToken mAccessToken, int requestType, String api_type, String api_detail, Map<String, Object> params) {
-
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(Weibo.class, new StatusModelAdapter())
-//                .create();
+    public static void request(final Context context, Oauth2AccessToken mAccessToken, int requestType, final String api_type, final String api_detail, Map<String, Object> params) {
 
         //步骤4:创建Retrofit对象
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API.baseURL) // 设置 网络请求 Url
                 .addConverterFactory(GsonConverterFactory.create())   //设置使用Gson解析(记得加入依赖)
-                //然后将上面的GsonConverterFactory.create()替换成我们自定义的ResponseConverterFactory.create()
-//                .addConverterFactory(ResponseConverterFactory.create())
 //                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
 
@@ -73,7 +67,7 @@ public class NetUtils {
 
                 if (result != null) {
 //                    NetUtils.result = result;
-                        callbackData.backData(result);
+                        callbackDataListener.callBack(result, api_type + api_detail);
                 } else {
                     Toast.makeText(context, "Can't get result", Toast.LENGTH_SHORT).show();
 

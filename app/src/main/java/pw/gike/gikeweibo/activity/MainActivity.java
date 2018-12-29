@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,7 +23,7 @@ import pw.gike.gikeweibo.bean.statuses.Weibo;
 import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
 
-public class MainActivity extends AppCompatActivity implements NetUtils.CallbackData {
+public class MainActivity extends AppCompatActivity implements NetUtils.CallbackDataListener {
 
     private Button btCopyToken;
 
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private Weibo resultWeibo;
 
-    private String resultJson;
+//    private String resultJson;
 
     private int currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
@@ -82,35 +81,12 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         NetUtils.request(MainActivity.this, mAccessToken, NetUtils.REQUEST_GET,
                 API.type_statuses, API.home_timeline, params);
 //                        NetUtils.setDataListener(MainActivity.this);
-        // 设置数据返回监听器
-        NetUtils.setDataListener(new NetUtils.CallbackData() {
-            @Override
-            public void backData(Object result) {
-
-                if (result != null) {
-                    // 获取请求结果成功后的操作
-                    // 通过 Gson 把 Json 反序列化为 Weibo 对象
-                    MainActivity.this.resultWeibo = new Gson().fromJson(StringUtils.objectToJsonString(result), Weibo.class);
-                    Log.i("MainActivityCallback", MainActivity.this.resultWeibo.getTotalNumber().toString());
-
-                    try {
-                        String tvShowStr = "当前页码：" + currentPage + "\n"
-                                + MainActivity.this.resultWeibo.getStatuses().get(0).getText();
-                        tvToken.setText(tvShowStr);
-                        lastPage = currentPage;
-                    } catch (IndexOutOfBoundsException e) {
-                        currentPage = -1;  // 页码等于-1时代表出错，不再自增
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(MainActivity.this, "获取信息失败！", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     private void setListener() {
+
+        // 设置请求的数据返回监听器
+        NetUtils.setDataListener(this);
 
         btCopyToken.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +117,22 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         });
     }
 
+    private void setWeibo(Object result) {
+        // 通过 Gson 把 Json 反序列化为 Weibo 对象
+        MainActivity.this.resultWeibo = new Gson().fromJson(StringUtils.objectToJsonString(result), Weibo.class);
+
+        try {
+            String tvShowStr = "当前页码：" + currentPage + "\n"
+                    + MainActivity.this.resultWeibo.getStatuses().get(0).getText();
+            tvToken.setText(tvShowStr);
+            lastPage = currentPage;
+        } catch (IndexOutOfBoundsException e) {
+            currentPage = -1;  // 页码等于-1时代表出错，不再自增
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -168,7 +160,18 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     }
 
     @Override
-    public void backData(Object result) {
-        this.resultJson = StringUtils.objectToJsonString(result);
+    public void callBack(Object result, String api) {
+        if (result == null) {
+            Toast.makeText(MainActivity.this, "获取信息失败！", Toast.LENGTH_SHORT).show();
+            return;
+        }
+//        this.resultJson = StringUtils.objectToJsonString(result);
+        // 根据回传的 api 字串判断执行哪些操作
+        switch (api) {
+            case API.type_statuses + API.home_timeline:
+                // 获取请求结果成功后的操作
+                setWeibo(result);
+                break;
+        }
     }
 }
