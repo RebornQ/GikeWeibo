@@ -42,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private RecyclerView recyclerView;
 
+    private WeiboAdapter weiboAdapter;
+
+    private boolean isLoadMore = false;
+
     private Integer currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
     private Integer lastPage = 1; // 获取到的微博列表最后页码
@@ -133,6 +137,12 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         }
     }
 
+    private void initData() {
+        weiboAdapter = new WeiboAdapter(this, lyComment, this, resultWeibo);
+        recyclerView.setAdapter(weiboAdapter);
+        recyclerView.addOnScrollListener(monScrollListener);
+    }
+
     private void setWeibo(Object result) {
         // 通过 Gson 把 Json 反序列化为 Weibo 对象
         MainActivity.this.resultWeibo = new Gson().fromJson(StringUtils.objectToJsonString(result), Weibo.class);
@@ -141,8 +151,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 //            String tvShowStr = "当前页码：" + currentPage + "\n"
 //                    + MainActivity.this.resultWeibo.getStatuses().get(0).getText();
 //            tvToken.setText(tvShowStr);
-            WeiboAdapter weiboAdapter = new WeiboAdapter(this, lyComment, this, resultWeibo);
-            recyclerView.setAdapter(weiboAdapter);
+            initData();
             lastPage = currentPage;
         } catch (IndexOutOfBoundsException e) {
             currentPage = -1;  // 页码等于-1时代表出错，不再自增
@@ -150,6 +159,40 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
         }
     }
+    //本段可直接Copy，作用是监听Recycleview是否滑动到底部
+    private int mLastVisibleItemPosition;
+    private RecyclerView.OnScrollListener monScrollListener = new RecyclerView.OnScrollListener() {
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+            if (layoutManager instanceof LinearLayoutManager) {
+                mLastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
+            }
+            if (weiboAdapter != null) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                        && mLastVisibleItemPosition + 1 == weiboAdapter.getItemCount()) {
+                    //发送网络请求获取更多数据
+                    Oauth2AccessToken mAccessToken = checkAccessToken(MainActivity.this);
+                    if (mAccessToken != null) {
+                        // 已登录，执行请求操作
+                        if (currentPage > 0) {
+                            currentPage++;
+                            WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
+                            if (isLoadMore) {
+                                weiboAdapter.addList(resultWeibo.getStatuses());
+                                weiboAdapter.notifyDataSetChanged();
+                                isLoadMore = false;
+                            }
+                        } else if (currentPage == -1) {
+                            Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
+                            isLoadMore = false;
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -183,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             case API.type_statuses + API.home_timeline:
                 // 获取请求结果成功后的操作
                 setWeibo(result);
+                isLoadMore = true;
                 break;
             case API.type_comments + API.comment_create:
                 Comment comment = new Gson().fromJson(StringUtils.objectToJsonString(result), Comment.class);

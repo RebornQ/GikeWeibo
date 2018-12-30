@@ -15,15 +15,17 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 
+import java.util.List;
+
 import pw.gike.gikeweibo.R;
 import pw.gike.gikeweibo.bean.statuses.Status;
 import pw.gike.gikeweibo.bean.statuses.Weibo;
 
 public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> {
 
-//    private List<Status> mWeiboStatuses;
+    private List<Status> mWeiboStatuses;
 
-    private Weibo mWeibo;
+//    private Weibo mWeibo;
 
     private Context context;
 
@@ -46,10 +48,10 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        final Status status = mWeibo.getStatuses().get(i);
+        final Status status = mWeiboStatuses.get(i);
         Glide.with(context)
                 .load(status.getUser().getProfileImageUrl())
-                
+
                 .into(viewHolder.imHead);
         viewHolder.tvUsername.setText(status.getUser().getName());
         viewHolder.tvTime.setText(status.getCreatedAt());
@@ -63,9 +65,14 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         });
     }
 
+    public void addList(List<Status> mWeiboStatuses) {
+        this.mWeiboStatuses.addAll(mWeiboStatuses);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
-        return mWeibo.getStatuses().size();
+        return mWeiboStatuses.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -87,7 +94,7 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
     }
 
     public WeiboAdapter(Context context, LinearLayout lyComment, CallbackListener callbackListener,Weibo weibo) {
-        mWeibo = weibo;
+        mWeiboStatuses = weibo.getStatuses();
         this.context = context;
         this.lyComment = lyComment;
         this.callbackListener = callbackListener;
