@@ -7,30 +7,40 @@
     tools:context=".activity.MainActivity"
     tools:layout_editor_absoluteY="81dp">
 
-    <TextView
-        android:id="@+id/tv_show_token"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="208dp"
-        android:text="Here is Token!"
-        android:textSize="18sp"
+
+    <!--<TextView-->
+    <!--android:id="@+id/tv_show_token"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="Here is Token!"-->
+    <!--android:textSize="18sp"-->
+    <!--tools:layout_editor_absoluteX="135dp"-->
+    <!--tools:layout_editor_absoluteY="208dp" />-->
+
+    <!--<Button-->
+    <!--android:id="@+id/bt_page_next"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="Next Page"-->
+    <!--android:textAllCaps="false"-->
+    <!--tools:layout_editor_absoluteX="142dp"-->
+    <!--tools:layout_editor_absoluteY="247dp" />-->
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/ly_comment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/bt_page_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="7dp"
-        android:layout_marginTop="14dp"
-        android:text="Next Page"
-        android:textAllCaps="false"
-        app:layout_constraintStart_toStartOf="@+id/tv_show_token"
-        app:layout_constraintTop_toBottomOf="@+id/tv_show_token" />
-
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/ly_comment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -38,13 +48,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintVertical_weight="1">
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView">
 
         <EditText
             android:id="@+id/et_comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:layout_gravity="center"
             android:ems="10"
             android:hint="Comment"
             android:inputType="textPersonName" />
@@ -54,6 +65,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
+            android:layout_gravity="center"
+            android:background="#00000000"
             android:src="@drawable/ic_action_send" />
     </LinearLayout>
 
