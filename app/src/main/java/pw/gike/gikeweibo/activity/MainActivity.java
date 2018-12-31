@@ -17,10 +17,14 @@ import com.google.gson.Gson;
 import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pw.gike.gikeweibo.API;
 import pw.gike.gikeweibo.R;
 import pw.gike.gikeweibo.adapter.WeiboAdapter;
 import pw.gike.gikeweibo.bean.comments.Comment;
+import pw.gike.gikeweibo.bean.statuses.Status;
 import pw.gike.gikeweibo.bean.statuses.Weibo;
 import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
@@ -38,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private Weibo resultWeibo;
 
+    private List<Status> statusList = new ArrayList<>();
+
 //    private String resultJson;
 
     private RecyclerView recyclerView;
@@ -45,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     private WeiboAdapter weiboAdapter;
 
     private boolean isLoadMore = false;
+
+    private boolean isDataInited = false;
 
     private Integer currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
@@ -69,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     }
 
     private void initView() {
-//        tvToken = findViewById(R.id.tv_show_token);
         etComment = findViewById(R.id.et_comment);
         btComment = findViewById(R.id.bt_send);
         lyComment = findViewById(R.id.ly_comment);
@@ -84,24 +91,6 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
         // 设置请求的数据返回监听器
         NetUtils.setDataListener(this);
-
-//        btNextPage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Oauth2AccessToken mAccessToken = checkAccessToken(MainActivity.this);
-//                if (mAccessToken != null) {
-//                    // 已登录，执行请求操作
-//                    if (currentPage > 0) {
-//                        currentPage++;
-//                        WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
-//                    } else if (currentPage == -1) {
-//                        Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
-//                    }
-////                        StringUtils.putTextIntoClip(MainActivity.this, mAccessToken.getToken());
-////                        Toast.makeText(MainActivity.this, "复制成功！", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
 
         btComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,9 +127,13 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     }
 
     private void initData() {
-        weiboAdapter = new WeiboAdapter(this, lyComment, this, resultWeibo);
-        recyclerView.setAdapter(weiboAdapter);
-        recyclerView.addOnScrollListener(monScrollListener);
+        statusList = resultWeibo.getStatuses();
+        if (!isDataInited) {
+            weiboAdapter = new WeiboAdapter(this, lyComment, this, statusList);
+            recyclerView.setAdapter(weiboAdapter);
+            recyclerView.addOnScrollListener(monScrollListener);
+            isDataInited = true;
+        }
     }
 
     private void setWeibo(Object result) {
