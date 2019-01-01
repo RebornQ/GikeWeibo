@@ -70,6 +70,12 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
+    public void refresh(List<Status> mWeiboStatuses) {
+        this.mWeiboStatuses.clear();
+        this.mWeiboStatuses.addAll(mWeiboStatuses);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return mWeiboStatuses.size();
@@ -93,8 +99,8 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         }
     }
 
-    public WeiboAdapter(Context context, LinearLayout lyComment, CallbackListener callbackListener,Weibo weibo) {
-        mWeiboStatuses = weibo.getStatuses();
+    public WeiboAdapter(Context context, LinearLayout lyComment, CallbackListener callbackListener,List<Status> mWeiboStatuses) {
+        this.mWeiboStatuses = mWeiboStatuses;
         this.context = context;
         this.lyComment = lyComment;
         this.callbackListener = callbackListener;
