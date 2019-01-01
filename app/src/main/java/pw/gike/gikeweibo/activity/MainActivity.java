@@ -1,8 +1,10 @@
 package pw.gike.gikeweibo.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -66,6 +68,27 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private Integer lastPage = 1; // 获取到的微博列表最后页码
 
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+            if (msg.what == 0) {
+                if (weiboAdapter != null) {
+                    weiboAdapter.addList(resultWeibo.getStatuses());
+                    weiboAdapter.notifyDataSetChanged();
+                }
+                isLoadMore = false;
+            } else if (msg.what == 1) {
+                if (weiboAdapter != null) {
+                    weiboAdapter.refresh(resultWeibo.getStatuses());
+                    weiboAdapter.notifyDataSetChanged();
+                }
+                isRefresh = false;
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             public void onRefresh() {
                 if (mAccessToken != null) {
                     currentPage = 1;
-                    WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
                     isRefresh = true;
+                    WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
                 }
                 // TODO Auto-generated method stub
                 new Handler().postDelayed(new Runnable() {
@@ -247,16 +270,14 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 // 获取请求结果成功后的操作
                 setWeibo(result);
                 if (isLoadMore) {
-                    weiboAdapter.addList(resultWeibo.getStatuses());
-                    weiboAdapter.notifyDataSetChanged();
-                    isLoadMore = false;
+                    Message message = new Message();
+                    message.what = 0;
+                    handler.sendMessage(message);
                 }
                 if (isRefresh) {
-                    if (weiboAdapter != null) {
-                        weiboAdapter.refresh(resultWeibo.getStatuses());
-                        weiboAdapter.notifyDataSetChanged();
-                    }
-                    isRefresh = false;
+                    Message message = new Message();
+                    message.what = 1;
+                    handler.sendMessage(message);
                 }
                 break;
             case API.type_comments + API.comment_create:
