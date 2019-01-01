@@ -70,6 +70,12 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
+    public void refresh(List<Status> mWeiboStatuses) {
+        this.mWeiboStatuses.clear();
+        this.mWeiboStatuses.addAll(mWeiboStatuses);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return mWeiboStatuses.size();

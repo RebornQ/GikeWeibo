@@ -2,7 +2,9 @@ package pw.gike.gikeweibo.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,7 +32,7 @@ import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
 import pw.gike.gikeweibo.util.requests.WeiboRequests;
 
-public class MainActivity extends AppCompatActivity implements NetUtils.CallbackDataListener,WeiboAdapter.CallbackListener {
+public class MainActivity extends AppCompatActivity implements NetUtils.CallbackDataListener, WeiboAdapter.CallbackListener {
 
     private ImageButton btComment;
 
@@ -44,15 +46,21 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 
     private List<Status> statusList = new ArrayList<>();
 
+    private Oauth2AccessToken mAccessToken;
+
 //    private String resultJson;
 
     private RecyclerView recyclerView;
 
     private WeiboAdapter weiboAdapter;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private boolean isLoadMore = false;
 
     private boolean isDataInited = false;
+
+    private boolean isRefresh = false;
 
     private Integer currentPage = 1; // 获取到的微博列表当前页码  // 页码等于-1时代表出错，不再自增
 
@@ -68,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         setListener();
 
         // 先判断是否已登录，登录则直接获取 token 执行请求操作
-        Oauth2AccessToken mAccessToken = checkAccessToken(this);
+        mAccessToken = checkAccessToken(this);
         if (mAccessToken != null) {
             // 已登录，执行请求操作
             Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
@@ -85,6 +93,30 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         recyclerView = findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+
+        //上拉刷新（有动画）
+        swipeRefreshLayout = findViewById(R.id.swipe_container);
+        //设置刷新时动画的颜色，可以设置4个
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (mAccessToken != null) {
+                    currentPage = 1;
+                    WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
+                    isRefresh = true;
+                }
+                // TODO Auto-generated method stub
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+                        swipeRefreshLayout.setRefreshing(false);
+                        isRefresh = false;
+                    }
+                }, 2500);//default = 6000
+            }
+        });
     }
 
     private void setListener() {
@@ -96,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             @Override
             public void onClick(View v) {
                 String comment = String.valueOf(etComment.getText());
-                Oauth2AccessToken mAccessToken = checkAccessToken(MainActivity.this);
                 if (mAccessToken != null) {
                     if (comment != null && !comment.equals("") && currentPage > 0) {
                         WeiboRequests.commentWeiboRequest(MainActivity.this, mAccessToken, comment, statusId);
@@ -127,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     }
 
     private void initData() {
+//          statusList.clear();
         statusList = resultWeibo.getStatuses();
         if (!isDataInited) {
             weiboAdapter = new WeiboAdapter(this, lyComment, this, statusList);
@@ -152,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
         }
     }
-    //本段可直接Copy，作用是监听Recycleview是否滑动到底部
+
+    //本段可直接Copy，作用是监听RecyclerView是否滑动到底部
     private int mLastVisibleItemPosition;
     private RecyclerView.OnScrollListener monScrollListener = new RecyclerView.OnScrollListener() {
 
@@ -166,17 +199,12 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
                 if (newState == RecyclerView.SCROLL_STATE_IDLE
                         && mLastVisibleItemPosition + 1 == weiboAdapter.getItemCount()) {
                     //发送网络请求获取更多数据
-                    Oauth2AccessToken mAccessToken = checkAccessToken(MainActivity.this);
                     if (mAccessToken != null) {
                         // 已登录，执行请求操作
                         if (currentPage > 0) {
                             currentPage++;
                             WeiboRequests.getWeiboRequest(MainActivity.this, mAccessToken, currentPage);
-                            if (isLoadMore) {
-                                weiboAdapter.addList(resultWeibo.getStatuses());
-                                weiboAdapter.notifyDataSetChanged();
-                                isLoadMore = false;
-                            }
+                            isLoadMore = true;
                         } else if (currentPage == -1) {
                             Toast.makeText(MainActivity.this, "已到最后一页: " + lastPage, Toast.LENGTH_SHORT).show();
                             isLoadMore = false;
@@ -194,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             if (data != null) {
 //                String name = data.getStringExtra("extra_data_tag");
 //                Toast.makeText(MainActivity.this, "Return MainActivity", Toast.LENGTH_SHORT).show();
-                Oauth2AccessToken mAccessToken = checkAccessToken(this);
                 if (mAccessToken != null) {
                     Toast.makeText(MainActivity.this, "Token: " + mAccessToken.getToken(), Toast.LENGTH_SHORT).show();
                     WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
@@ -219,7 +246,18 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
             case API.type_statuses + API.home_timeline:
                 // 获取请求结果成功后的操作
                 setWeibo(result);
-                isLoadMore = true;
+                if (isLoadMore) {
+                    weiboAdapter.addList(resultWeibo.getStatuses());
+                    weiboAdapter.notifyDataSetChanged();
+                    isLoadMore = false;
+                }
+                if (isRefresh) {
+                    if (weiboAdapter != null) {
+                        weiboAdapter.refresh(resultWeibo.getStatuses());
+                        weiboAdapter.notifyDataSetChanged();
+                    }
+                    isRefresh = false;
+                }
                 break;
             case API.type_comments + API.comment_create:
                 Comment comment = new Gson().fromJson(StringUtils.objectToJsonString(result), Comment.class);
