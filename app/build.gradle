@@ -80,7 +80,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'     //打印网络请求的log日志
 
     // Rxjava
-    implementation 'io.reactivex:rxandroid:1.2.1'                       //Rxjava专门针对anroid封装的RxAndroid
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    //Rxjava专门针对anroid封装的RxAndroid
     implementation 'io.reactivex:rxjava:1.2.4'
 
     // 解决多包冲突

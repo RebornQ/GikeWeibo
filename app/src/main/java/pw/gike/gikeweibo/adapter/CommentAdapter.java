@@ -11,17 +11,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
 import com.bumptech.glide.Glide;
-
 
 import java.util.List;
 
 import pw.gike.gikeweibo.R;
+import pw.gike.gikeweibo.bean.comments.Comment;
 import pw.gike.gikeweibo.bean.statuses.Status;
-import pw.gike.gikeweibo.bean.statuses.Weibo;
 
-public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> implements View.OnClickListener{
+public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> implements View.OnClickListener{
 
     public interface OnItemClickListener{
         void onItemClick(int position);
@@ -29,7 +27,7 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
 
     private OnItemClickListener mItemClickListener;
 
-    private List<Status> mWeiboStatuses;
+    private List<Comment> comments;
 
 //    private Weibo mWeibo;
 
@@ -56,32 +54,32 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
-        final Status status = mWeiboStatuses.get(i);
+        final Comment comment = comments.get(i);
         Glide.with(context)
-                .load(status.getUser().getProfileImageUrl())
+                .load(comment.getUser().getProfileImageUrl())
 
                 .into(viewHolder.imHead);
-        viewHolder.tvUsername.setText(status.getUser().getName());
-        viewHolder.tvTime.setText(status.getCreatedAt());
-        viewHolder.tvContent.setText(status.getText());
+        viewHolder.tvUsername.setText(comment.getUser().getName());
+        viewHolder.tvTime.setText(comment.getCreatedAt());
+        viewHolder.tvContent.setText(comment.getText());
         viewHolder.btComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                lyComment.setVisibility(View.VISIBLE);
-                callbackListener.callback(status.getId());
+//                lyComment.setVisibility(View.VISIBLE);
+                callbackListener.callback(comment.getId());
             }
         });
         viewHolder.itemView.setTag(i);
     }
 
-    public void addList(List<Status> mWeiboStatuses) {
-        this.mWeiboStatuses.addAll(mWeiboStatuses);
+    public void addList(List<Comment> comments) {
+        this.comments.addAll(comments);
         notifyDataSetChanged();
     }
 
-    public void refresh(List<Status> mWeiboStatuses) {
-        this.mWeiboStatuses.clear();
-        this.mWeiboStatuses.addAll(mWeiboStatuses);
+    public void refresh(List<Comment> comments) {
+        this.comments.clear();
+        this.comments.addAll(comments);
         notifyDataSetChanged();
     }
 
@@ -98,7 +96,7 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return mWeiboStatuses.size();
+        return comments.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -120,8 +118,8 @@ public class WeiboAdapter extends RecyclerView.Adapter<WeiboAdapter.ViewHolder> 
         }
     }
 
-    public WeiboAdapter(Context context, LinearLayout lyComment, CallbackListener callbackListener,List<Status> mWeiboStatuses) {
-        this.mWeiboStatuses = mWeiboStatuses;
+    public CommentAdapter(Context context, LinearLayout lyComment, CallbackListener callbackListener, List<Comment> comments) {
+        this.comments = comments;
         this.context = context;
         this.lyComment = lyComment;
         this.callbackListener = callbackListener;

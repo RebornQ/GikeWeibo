@@ -1,19 +1,25 @@
 package pw.gike.gikeweibo.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.Toast;
 
+import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 import java.util.Map;
 
 import pw.gike.gikeweibo.API;
+import pw.gike.gikeweibo.activity.WBAuthActivity;
 import pw.gike.gikeweibo.interfaces.RequestInterface;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.app.Activity.RESULT_FIRST_USER;
 
 public class NetUtils {
 
@@ -87,5 +93,24 @@ public class NetUtils {
             }
         }).start();
 
+    }
+
+    public static Oauth2AccessToken checkAccessToken(Activity activity) {
+        Oauth2AccessToken mAccessToken = AccessTokenKeeper.readAccessToken(activity);
+        if (mAccessToken != null && mAccessToken.getToken() != null && !mAccessToken.getToken().equals("")) {
+            if (mAccessToken.isSessionValid()) {
+                return mAccessToken;
+            } else {
+                Toast.makeText(activity, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(activity, WBAuthActivity.class);
+                activity.startActivityForResult(intent, RESULT_FIRST_USER);
+                return null;
+            }
+        } else {
+            Toast.makeText(activity, "请先登录", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(activity, WBAuthActivity.class);
+            activity.startActivityForResult(intent, RESULT_FIRST_USER);
+            return null;
+        }
     }
 }
