@@ -78,6 +78,24 @@ public class WeiboRequests {
     }
 
     /**
+     * 获取一条微博的评论
+     * @param context 上下文
+     * @param mAccessToken OAuth授权后获得的 accessToken
+     * @param id 需要查询的微博ID
+     * */
+    public static void getCommentWeiboRequest(Context context, Oauth2AccessToken mAccessToken, long id, Integer currentPage) {
+        // 请求所需的参数（动态参数）
+        Map<String, Object> params = new HashMap<>();
+        params.put("access_token", mAccessToken.getToken());    // 采用OAuth授权方式为必填参数，OAuth授权后获得。
+        params.put("id", id);// 需要评论的微博ID。
+        params.put("page", currentPage);   // 返回结果的页码，默认为1。
+        // 发出请求
+//        Call<Comment> call = null;
+        NetUtils.request(context, mAccessToken, NetUtils.REQUEST_GET,
+                API.type_comments, API.comment_show, params);
+    }
+
+    /**
      * 转发一条微博
      * @param context 上下文
      * @param mAccessToken OAuth授权后获得的 accessToken

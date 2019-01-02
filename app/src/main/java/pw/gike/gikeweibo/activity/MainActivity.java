@@ -1,7 +1,6 @@
 package pw.gike.gikeweibo.activity;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -18,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.sina.weibo.sdk.auth.AccessTokenKeeper;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 import java.util.ArrayList;
@@ -75,12 +73,15 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
 //            super.handleMessage(msg);
             if (msg.what == 0) {
                 if (weiboAdapter != null) {
+                    statusList.addAll(resultWeibo.getStatuses());
                     weiboAdapter.addList(resultWeibo.getStatuses());
                     weiboAdapter.notifyDataSetChanged();
                 }
                 isLoadMore = false;
             } else if (msg.what == 1) {
                 if (weiboAdapter != null) {
+                    statusList.clear();
+                    statusList.addAll(resultWeibo.getStatuses());
                     weiboAdapter.refresh(resultWeibo.getStatuses());
                     weiboAdapter.notifyDataSetChanged();
                 }
@@ -99,11 +100,12 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         setListener();
 
         // 先判断是否已登录，登录则直接获取 token 执行请求操作
-        mAccessToken = checkAccessToken(this);
+        mAccessToken = NetUtils.checkAccessToken(this);
         if (mAccessToken != null) {
             // 已登录，执行请求操作
             Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
             WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
+//            isRefresh = true;
         }
     }
 
@@ -161,31 +163,20 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         });
     }
 
-    private Oauth2AccessToken checkAccessToken(Context context) {
-        Oauth2AccessToken mAccessToken = AccessTokenKeeper.readAccessToken(context);
-        if (mAccessToken != null && mAccessToken.getToken() != null && !mAccessToken.getToken().equals("")) {
-            if (mAccessToken.isSessionValid()) {
-                return mAccessToken;
-            } else {
-                Toast.makeText(context, "Token已失效，请重新登录", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(context, WBAuthActivity.class);
-                startActivityForResult(intent, RESULT_FIRST_USER);
-                return null;
-            }
-        } else {
-            Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(context, WBAuthActivity.class);
-            startActivityForResult(intent, RESULT_FIRST_USER);
-            return null;
-        }
-    }
-
     private void initData() {
 //          statusList.clear();
-        statusList = resultWeibo.getStatuses();
         if (!isDataInited) {
+            statusList = resultWeibo.getStatuses();
             weiboAdapter = new WeiboAdapter(this, lyComment, this, statusList);
             recyclerView.setAdapter(weiboAdapter);
+            weiboAdapter.setItemClickListener(new WeiboAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(int position) {
+                    Intent intent = new Intent(MainActivity.this, WbDetailActivity.class);
+                    intent.putExtra("WeiboItem", new Gson().toJson(statusList.get(position)));
+                    startActivity(intent);
+                }
+            });
             recyclerView.addOnScrollListener(monScrollListener);
             isDataInited = true;
         }
