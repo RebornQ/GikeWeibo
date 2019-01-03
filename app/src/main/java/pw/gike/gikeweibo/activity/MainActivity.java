@@ -40,6 +40,7 @@ import pw.gike.gikeweibo.R;
 import pw.gike.gikeweibo.adapter.WeiboAdapter;
 import pw.gike.gikeweibo.bean.comments.Comment;
 import pw.gike.gikeweibo.bean.statuses.Status;
+import pw.gike.gikeweibo.bean.statuses.User;
 import pw.gike.gikeweibo.bean.statuses.Weibo;
 import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
@@ -138,7 +139,7 @@ public class MainActivity extends AppCompatActivity
         if (mAccessToken != null) {
             // 已登录，执行请求操作
             Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
-
+            WeiboRequests.getWeiboUserInfoRequest(this, mAccessToken, mAccessToken.getUid());
             WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
 //            isRefresh = true;
         }
@@ -312,6 +313,12 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(this, "评论成功", Toast.LENGTH_SHORT).show();
 //                    tvToken.setText(comment.getText());
                     etComment.setText("");
+                }
+                break;
+            case API.type_users + API.user_show:
+                User user = new Gson().fromJson(StringUtils.objectToJsonString(result), User.class);
+                if (user!=null && user.getName() != null && user.getName().equals("")) {
+                    System.out.println("Username: " + user.getName());
                 }
                 break;
         }
