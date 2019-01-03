@@ -11,8 +11,10 @@ public class API {
     public static final String type_comments = "comments";
     public static final String type_friendships = "friendships";
     public static final String type_trends = "trends";
+    public static final String type_users = "users";
 
-    public static final String user_show = "users/show.json?uid={0}&access_token={1}";
+    //users
+    public static final String user_show = "show.json"; // ?uid={0}&access_token={1}
 
     // statuses
     public static final String public_timeline = "public_timeline.json";   // ?access_token={0}
