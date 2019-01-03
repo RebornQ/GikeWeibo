@@ -1,16 +1,29 @@
 package pw.gike.gikeweibo.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -32,7 +45,8 @@ import pw.gike.gikeweibo.util.NetUtils;
 import pw.gike.gikeweibo.util.StringUtils;
 import pw.gike.gikeweibo.util.requests.WeiboRequests;
 
-public class MainActivity extends AppCompatActivity implements NetUtils.CallbackDataListener, WeiboAdapter.CallbackListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, NetUtils.CallbackDataListener,WeiboAdapter.CallbackListener  {
 
     private ImageButton btComment;
 
@@ -94,6 +108,26 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "当前Appid未通过实名，无法使用该功能", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         initView();
 
@@ -104,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
         if (mAccessToken != null) {
             // 已登录，执行请求操作
             Toast.makeText(MainActivity.this, "已登录", Toast.LENGTH_SHORT).show();
+
             WeiboRequests.getWeiboRequest(this, mAccessToken, currentPage);
 //            isRefresh = true;
         }
@@ -286,4 +321,78 @@ public class MainActivity extends AppCompatActivity implements NetUtils.Callback
     public void callback(Object data) {
         statusId = (Long) data;
     }
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_switchaccount) {
+            Intent intent = new Intent(MainActivity.this,WBAuthActivity.class);
+            startActivity(intent);
+        }else if (id == R.id.action_exit) {
+            // Kill JVM
+            System.exit(0);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_index) {
+//            Intent intent = new Intent(MainActivity.this,IndexActivity.class);
+//            startActivity(intent);
+        } else if (id == R.id.nav_msg) {
+            showAlert("当前Appid未通过实名，调用接口失败，无法使用该功能");
+        } else if (id == R.id.nav_user) {
+            showAlert("当前Appid未通过实名，调用接口失败，无法使用该功能");
+        } else if (id == R.id.nav_set) {
+            Intent intent = new Intent(MainActivity.this,WBAuthActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_share) {
+            showAlert("由于GikeWeibo尚未上线，暂时无法分享");
+        } else if (id == R.id.nav_logout) {
+
+        } else if (id == R.id.nav_exit) {
+            // Kill JVM
+            System.exit(0);
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+    private void showAlert(String text){
+        new AlertDialog.Builder(MainActivity.this).setTitle("GikeWeibo")
+                .setMessage(text)
+                .setPositiveButton("确定",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).show();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            moveTaskToBack(true);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 }
