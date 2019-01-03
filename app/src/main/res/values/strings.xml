@@ -1,3 +1,21 @@
 <resources>
     <!--<string name="app_name">Gike微博</string>-->
+    <string name="first_show">Powered By Reborn &amp; Huade</string>
+    <string name="title_activity_main">Gike微博</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">未登录</string>
+    <string name="nav_header_subtitle">点击登录</string>
+    <string name="nav_header_desc">头像</string>
+    <string name="action_settings">设置</string>
+    <string name="nav_index">微博</string>
+    <string name="nav_msg">消息</string>
+    <string name="nav_user">我</string>
+    <string name="nav_share">分享</string>
+    <string name="nav_set">切换账号</string>
+    <string name="nav_logout">注销</string>
+    <string name="nav_exit">退出</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
